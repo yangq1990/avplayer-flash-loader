@@ -24,7 +24,6 @@
 	import fl.transitions.TweenEvent;
 	import flash.net.navigateToURL;
 	import flash.events.TextEvent;
-	import MultifunctionalLoader;
 	import LoaderErrorCode;
 	import flash.net.URLLoader;
 	import flash.system.SecurityDomain;
@@ -66,27 +65,10 @@
 			_error_mc.x = w * 0.5;
 			_error_mc.y = h * 0.5 - 25;
 			
-			//下载loading.swf
-			var loadingLoader:MultifunctionalLoader = new MultifunctionalLoader();
-			loadingLoader.registerFunctions(onLoadLoadingComplete, onLoadLoadingError);
-			loadingLoader.load('./loading.swf');
-		}
-		
-		private var _tempLoading:DisplayObject;
-		/** 加载第三方loading complete **/
-		private function onLoadLoadingComplete(dp:DisplayObject):void
-		{
-			_tempLoading = dp;
-			this.addChild(_tempLoading);
-			_tempLoading.x = (stage.stageWidth - _tempLoading.width) * 0.5;
-			_tempLoading.y = (stage.stageHeight - _tempLoading.height) * 0.5;
+			//默认可见
+			_loading_mc.x = w * 0.5;
+			_loading_mc.y = (h - 40) * 0.5;
 			
-			loadAVPlayer();
-		}
-		
-		//加载第三方loading出错，直接切换至加载avplayer.swf
-		private function onLoadLoadingError(errMsg:String):void
-		{
 			loadAVPlayer();
 		}
 		
@@ -108,8 +90,8 @@
 				context.parameters[item] = stage.loaderInfo.parameters[item];
 			}
 			//context.parameters的key-value, value必须为字符串，否则会触发IllegalOperationError:LoaderContext.parameters 参数设置为非 null，并且具有不是字符串的某些值
-			context.parameters["skinUrl"] = "./skin.swf";	
-			var req:URLRequest = new URLRequest('./avplayer.swf');			
+			context.parameters["skinUrl"] = "./flash/skin.swf";	
+			var req:URLRequest = new URLRequest('./flash/avplayer.swf');			
 			_loader.load(req, context);
 		}
 		
@@ -156,11 +138,11 @@
 		
 		private function removeLoading():void
 		{			
-			if(_tempLoading)
+			if(_loading_mc)
 			{
-				_tempLoading.addEventListener(Event.REMOVED_FROM_STAGE, onLoadingRemoveFromStage);
-				_tempLoading.visible = false;
-				removeChild(_tempLoading);		
+				_loading_mc.addEventListener(Event.REMOVED_FROM_STAGE, onLoadingRemoveFromStage);
+				_loading_mc.visible = false;
+				removeChild(_loading_mc);		
 			}			
 				
 			if(_error_mc)
@@ -178,7 +160,7 @@
 		//loading被移除舞台
 		private function onLoadingRemoveFromStage(evt:Event):void
 		{
-			_tempLoading && (_tempLoading = null);
+			_loading_mc && (_loading_mc = null);
 			_error_mc && (_error_mc = null);
 			
 			//通知avplayer.swf显示界面
@@ -198,10 +180,10 @@
 		{
 			if(_tween == null)
 			{
-				if(_tempLoading)
+				if(_loading_mc)
 				{
-					_tempLoading.parent.removeChild(_tempLoading);
-					_tempLoading = null;
+					_loading_mc.parent.removeChild(_loading_mc);
+					_loading_mc = null;
 				}					
 			
 				_error_mc.errorCodeTxt.text = _errorCode.toString();
